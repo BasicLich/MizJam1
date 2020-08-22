@@ -17,14 +17,15 @@ public class Enemy : MonoBehaviour
 
     public UnityEvent OnFirstHit;
     public UnityEvent OnHit;
-    public UnityEvent OnGetClose;
     public UnityEvent OnKill;
     public float lifeBarTweenTime = 0.2f;
     public Ease lifeLoseEase = Ease.InElastic;
 
     public float cameraShakeDuration = 0.2f;
     public float cameraShakeMagnitude = 0.2f;
+    public ParticleSystem hitParticles;
     public ParticleSystem deathParticles;
+    public SpriteRenderer sprite;
 
     public float CameraShakeMagnitude { get => cameraShakeMagnitude; set => cameraShakeMagnitude = value; }
 
@@ -38,7 +39,7 @@ public class Enemy : MonoBehaviour
     {
         GameObject dmgTxt = Instantiate(dmgTxtPrefab, damageTxtBasePos.position + (Vector3)Random.insideUnitCircle/3, transform.rotation);
         dmgTxt.GetComponent<DamageText>().ShowDamage(damage);
-        OnHit.Invoke();
+        hitParticles.Play();
         StartCoroutine(Player.instance.GetComponent<FirstPersonAIO>().CameraShake(cameraShakeDuration, CameraShakeMagnitude));
         if(currentHealthPoints == maxHealthPoints)
         {
@@ -49,7 +50,7 @@ public class Enemy : MonoBehaviour
         if (currentHealthPoints <= 0)
         {
             OnKill.Invoke();
-            //TODO cosas de morirse
+            //cosas de morirse
             deathParticles.Play();
             Destroy(gameObject, timeToDestroy);
             healthBar.DOScale(new Vector3(0, healthBarStartScale.y, healthBarStartScale.z), 0.1f).SetEase(lifeLoseEase);
@@ -57,8 +58,19 @@ public class Enemy : MonoBehaviour
         }
         else
         {
+            OnHit.Invoke();
             healthBar.DOScale(new Vector3(((float)currentHealthPoints / (float)maxHealthPoints) * healthBarStartScale.x, healthBarStartScale.y, healthBarStartScale.z)
                 , 0.1f).SetEase(lifeLoseEase);
         }
+    }
+
+    public void IncreaseCameraShake(float extraShake)
+    {
+        cameraShakeMagnitude += extraShake;
+    }
+
+    public void Vanish(float timeToVanish = 1f)
+    {
+        sprite.DOFade(0, timeToVanish);
     }
 }

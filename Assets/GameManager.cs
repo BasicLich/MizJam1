@@ -6,7 +6,7 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager gm;
     public int enemiesCount = 0;
-
+    public float timeToEnd = 0;
     public int tutorialStage = 0;
 
     public UpdatableTMP txt;
